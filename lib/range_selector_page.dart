@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_foundations/randomizer_page.dart';
+import 'package:flutter_foundations/range_selector_form.dart';
 
 class RangeSelectorPage extends StatefulWidget {
   const RangeSelectorPage({Key? key}) : super(key: key);
@@ -8,6 +10,7 @@ class RangeSelectorPage extends StatefulWidget {
 }
 
 class _RangeSelectorPageState extends State<RangeSelectorPage> {
+  final formKey = GlobalKey<FormState>();
   int _min = 0;
   int _max = 0;
 
@@ -15,52 +18,20 @@ class _RangeSelectorPageState extends State<RangeSelectorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Select Range')),
-      body: Form(
-          child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  RangeSelectorTextFormField(
-                    labelText: 'Minimum',
-                    intValueSetter: (value) => _min = value,
-                  ),
-                  SizedBox(height: 12),
-                  RangeSelectorTextFormField(labelText: 'Maximum'),
-                ],
-              ))),
+      body: RangeSelectorForm(
+        formKey: formKey,
+        minValueSetter: (value) => _min = value,
+        maxValueSetter: (value) => _max = value,
+      ),
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.arrow_forward),
           onPressed: () {
-            // TODO: Validate the Form
-            // TODO: Navigate to the generator page
+            if (formKey.currentState?.validate() == true) {
+              formKey.currentState?.save();
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => RandomizerPage(min: _min, max: _max)));
+            }
           }),
-    );
-  }
-}
-
-class RangeSelectorTextFormField extends StatelessWidget {
-  RangeSelectorTextFormField({
-    Key? key,
-    required this.labelText,
-    required this.intValueSetter,
-  }) : super(key: key);
-
-  final String labelText;
-  void Function(int value) intValueSetter;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      decoration: InputDecoration(
-        border: const OutlineInputBorder(),
-        labelText: labelText,
-      ),
-      keyboardType: const TextInputType.numberWithOptions(
-        decimal: false,
-        signed: true,
-      ),
-      onSaved: (newValue) => intValueSetter(int.parse(newValue ?? '')),
     );
   }
 }
